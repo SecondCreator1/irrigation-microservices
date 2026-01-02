@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import lombok.extern.slf4j.Slf4j;
 import tn.itbs.project.entity.ProgrammeArrosage;
+import tn.itbs.project.entity.Prevision;
+import tn.itbs.project.feign.MeteoFeign;
 import tn.itbs.project.repository.ProgrammeArrosageRepository;
 
 @Slf4j
@@ -20,12 +22,40 @@ public class ProgrammeArrosageService {
     @Autowired
     private ProgrammeArrosageRepository programmeRepo;
 
+    @Autowired
+    private MeteoFeign meteoFeign;
+
     @Transactional
     public ResponseEntity<Object> ajouter(ProgrammeArrosage programme) {
         programmeRepo.save(programme);
         log.info("Programme d'arrosage ajouté pour parcelle {}", programme.getParcelleId());
         return ResponseEntity.ok("Programme ajouté avec succès");
     }
+
+    // Exemple: ajout avec météo (appel Feign)
+    @Transactional
+    public ResponseEntity<Object> ajouterAvecMeteo(Long stationId, ProgrammeArrosage programme) {
+        String date = programme.getDatePlanifiee().toString();
+
+        // Appel Feign : récupère une liste de prévisions
+        List<Prevision> previsions = meteoFeign.getPrevisionsByStationAndDate(stationId, date);
+
+        if (previsions != null && !previsions.isEmpty()) {
+            Prevision prev = previsions.get(0); // par exemple la première
+
+            if (prev.getPluiePrevue() != null && prev.getPluiePrevue() > 10.0) {
+                Double vol = programme.getVolumePrevu();
+                if (vol != null && vol > 0) {
+                    programme.setVolumePrevu(vol * 0.5);
+                }
+            }
+        }
+
+        programmeRepo.save(programme);
+        log.info("Programme d'arrosage ajouté (météo prise en compte) pour parcelle {}", programme.getParcelleId());
+        return ResponseEntity.ok("Programme ajouté avec succès (météo prise en compte)");
+    }
+
 
     public ResponseEntity<Object> consulter(Long id) {
         ProgrammeArrosage programme = programmeRepo.findById(id)
@@ -62,20 +92,5 @@ public class ProgrammeArrosageService {
         programmeRepo.delete(programme);
         log.info("Programme d'arrosage supprimé, id={}", id);
         return ResponseEntity.ok("Programme supprimé avec succès");
-    }
-
-    @Transactional
-    public ResponseEntity<Object> changerStatut(Long id) {
-        ProgrammeArrosage programme = programmeRepo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Programme introuvable"));
-
-        if (programme.getStatut() == ProgrammeArrosage.StatutProgramme.TERMINE) {
-            programme.setStatut(ProgrammeArrosage.StatutProgramme.EN_COURS);
-            programmeRepo.save(programme);
-            log.info("Statut du programme changé en EN_COURS, id={}", id);
-            return ResponseEntity.ok("Statut changé en EN_COURS");
-        } else {
-            return ResponseEntity.badRequest().body("Le programme n'est pas terminé.");
-        }
     }
 }

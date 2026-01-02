@@ -19,6 +19,13 @@ public class ProgrammeArrosageController {
         return programmeService.ajouter(programme);
     }
 
+    // Ajout avec météo
+    @PostMapping("/add-with-meteo/{stationId}")
+    public ResponseEntity<Object> ajouterAvecMeteo(@PathVariable Long stationId,
+                                                   @RequestBody ProgrammeArrosage programme) {
+        return programmeService.ajouterAvecMeteo(stationId, programme);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Object> consulter(@PathVariable Long id) {
         return programmeService.consulter(id);
@@ -30,17 +37,13 @@ public class ProgrammeArrosageController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Object> modifier(@PathVariable Long id, @RequestBody ProgrammeArrosage programme) {
+    public ResponseEntity<Object> modifier(@PathVariable Long id,
+                                           @RequestBody ProgrammeArrosage programme) {
         return programmeService.modifier(id, programme);
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> supprimer(@PathVariable Long id) {
         return programmeService.supprimer(id);
-    }
-
-    @PutMapping("/changer-statut/{id}")
-    public ResponseEntity<Object> changerStatut(@PathVariable Long id) {
-        return programmeService.changerStatut(id);
     }
 }

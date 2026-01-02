@@ -48,4 +48,3 @@ public class JournalArrosageService {
         return ResponseEntity.ok("Journal supprimé avec succès");
     }
 }
-

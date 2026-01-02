@@ -39,9 +39,7 @@ public class PrevisionService {
 
         prevision.setStation(station);
         previsionRepo.save(prevision);
-        log.info("Prévision ajoutée pour la station {}", station.getNom());
 
-        // publication de l'événement ChangementConditions
         ChangementConditionsEvent event = ChangementConditionsEvent.builder()
                 .stationId(station.getId())
                 .stationNom(station.getNom())
@@ -55,10 +53,10 @@ public class PrevisionService {
                 RabbitMQConfig.CHANGEMENT_ROUTING_KEY,
                 event
         );
-        log.info("Événement ChangementConditions publié pour station {}", station.getNom());
 
         return ResponseEntity.ok("Prévision ajoutée avec succès");
     }
+
 
     public ResponseEntity<Object> consulter(Long id) {
         Prevision prevision = previsionRepo.findById(id)

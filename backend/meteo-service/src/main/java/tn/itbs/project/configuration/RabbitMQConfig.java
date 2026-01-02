@@ -25,8 +25,9 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    Binding changementBinding(Queue changementQueue, TopicExchange changementExchange) {
-        return BindingBuilder.bind(changementQueue)
+    public Binding changementBinding(Queue changementQueue, TopicExchange changementExchange) {
+        return BindingBuilder
+                .bind(changementQueue)
                 .to(changementExchange)
                 .with(CHANGEMENT_ROUTING_KEY);
     }

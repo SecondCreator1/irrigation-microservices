@@ -24,9 +24,7 @@ public class ChangementConditionsListener {
 
         log.info("Événement météo reçu pour station {} date {}", event.getStationNom(), event.getDate());
 
-        // Exemple de règle : si pluiePrévue > 10mm on réduit de 50% le volume
         if (event.getPluiePrevue() != null && event.getPluiePrevue() > 10.0) {
-            // ici on simplifie: on suppose que stationId == parcelleId
             List<ProgrammeArrosage> programmes =
                     programmeRepo.findByParcelleId(event.getStationId());
 
