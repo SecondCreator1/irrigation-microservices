@@ -83,9 +83,11 @@ services:
   frontend:
     build:
       context: ./frontend/irrigation-frontend
-      dockerfile: Dockerfile.frontend
+      dockerfile: ./Dockerfile.frontend
     ports:
       - "4200:80"
+    environment:
+      - API_GATEWAY_URL=http://gateway:9094
     depends_on:
       - gateway
     networks:
