@@ -1,14 +1,6 @@
-# Build stage
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
-COPY . .
-RUN npm run build -- --configuration production
-
-# Production stage
+# Production stage - assumes dist folder is pre-built
 FROM nginx:alpine
-COPY --from=builder /app/dist/irrigation-frontend /usr/share/nginx/html
+COPY dist/irrigation-frontend /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

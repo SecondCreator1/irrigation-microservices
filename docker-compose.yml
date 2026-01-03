@@ -59,7 +59,7 @@ services:
 
   gateway:
     build:
-      context: ./gateway-service
+      context: ./backend/Gateway
       dockerfile: Dockerfile
     ports:
       - "9094:9094"
