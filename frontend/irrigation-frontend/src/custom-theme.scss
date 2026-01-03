@@ -1,0 +1,32 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+// Définir la palette de couleurs
+$irrigation-primary: mat.define-palette(mat.$indigo-palette);
+$irrigation-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$irrigation-warn: mat.define-palette(mat.$red-palette);
+
+// Créer le thème
+$irrigation-theme: mat.define-light-theme((
+  color: (
+    primary: $irrigation-primary,
+    accent: $irrigation-accent,
+    warn: $irrigation-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+// Appliquer le thème
+@include mat.all-component-themes($irrigation-theme);
+
+// Customisations supplémentaires
+.mat-toolbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.mat-raised-button {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

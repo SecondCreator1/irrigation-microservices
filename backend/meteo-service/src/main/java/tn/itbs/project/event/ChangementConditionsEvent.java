@@ -1,20 +1,20 @@
 package tn.itbs.project.event;
 
 import lombok.*;
-import java.io.Serializable;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChangementConditionsEvent implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
+public class ChangementConditionsEvent {
     private Long stationId;
     private String stationNom;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
+    
     private Double pluiePrevue;
     private Double temperatureMax;
 }

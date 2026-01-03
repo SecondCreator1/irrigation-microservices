@@ -1,0 +1,67 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Créer' }} un programme d'arrosage</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="programmeForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Numéro de Parcelle</mat-label>
+      <input matInput type="number" formControlName="parcelleId" placeholder="Ex: 1">
+      <mat-icon matSuffix>landscape</mat-icon>
+      <mat-error *ngIf="programmeForm.get('parcelleId')?.hasError('required')">
+        Le numéro de parcelle est requis
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date Planifiée</mat-label>
+      <input matInput type="date" formControlName="datePlanifiee">
+      <mat-error *ngIf="programmeForm.get('datePlanifiee')?.hasError('required')">
+        La date est requise
+      </mat-error>
+    </mat-form-field>
+
+    <div class="row">
+      <mat-form-field appearance="outline">
+        <mat-label>Durée (minutes)</mat-label>
+        <input matInput type="number" formControlName="duree" placeholder="Ex: 60">
+        <mat-icon matSuffix>timer</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Volume Prévu (litres)</mat-label>
+        <input matInput type="number" formControlName="volumePrevu" placeholder="Ex: 500">
+        <mat-icon matSuffix>water</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Statut</mat-label>
+      <mat-select formControlName="statut">
+        <mat-option *ngFor="let statut of statuts" [value]="statut">
+          {{statut}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div *ngIf="!isEditMode" class="meteo-section">
+      <mat-checkbox [(ngModel)]="useMeteo" [ngModelOptions]="{standalone: true}">
+        Ajuster selon la météo
+      </mat-checkbox>
+
+      <mat-form-field appearance="outline" class="full-width" *ngIf="useMeteo">
+        <mat-label>Station Météo</mat-label>
+        <mat-select formControlName="stationId">
+          <mat-option *ngFor="let station of stations" [value]="station.id">
+            {{station.nom}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!programmeForm.valid">
+    {{ isEditMode ? 'Modifier' : 'Créer' }}
+  </button>
+</mat-dialog-actions>

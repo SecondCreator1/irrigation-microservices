@@ -1,0 +1,25 @@
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+  { 
+    path: '', 
+    redirectTo: '/dashboard', 
+    pathMatch: 'full' 
+  },
+  {
+    path: 'dashboard',
+    loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'meteo',
+    loadChildren: () => import('./features/meteo/meteo.module').then(m => m.MeteoModule)
+  },
+  {
+    path: 'arrosage',
+    loadChildren: () => import('./features/arrosage/arrosage.module').then(m => m.ArrosageModule)
+  },
+  { 
+    path: '**', 
+    redirectTo: '/dashboard' 
+  }
+];
