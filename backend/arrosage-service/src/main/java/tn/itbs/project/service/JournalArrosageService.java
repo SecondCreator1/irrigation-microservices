@@ -1,6 +1,8 @@
 package tn.itbs.project.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,9 +24,13 @@ public class JournalArrosageService {
 
     @Transactional
     public ResponseEntity<Object> ajouter(JournalArrosage journal) {
-        journalRepo.save(journal);
+        JournalArrosage saved = journalRepo.save(journal);
         log.info("Journal d'arrosage ajouté pour programme {}", journal.getProgrammeId());
-        return ResponseEntity.ok("Journal ajouté avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Journal ajouté avec succès");
+        response.put("journal", saved);
+        return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<Object> consulter(Long id) {
@@ -38,6 +44,11 @@ public class JournalArrosageService {
         return ResponseEntity.ok(journaux);
     }
 
+    public ResponseEntity<Object> listeTous() {
+        List<JournalArrosage> journaux = journalRepo.findAll();
+        return ResponseEntity.ok(journaux);
+    }
+
     @Transactional
     public ResponseEntity<Object> supprimer(Long id) {
         JournalArrosage journal = journalRepo.findById(id)
@@ -45,6 +56,10 @@ public class JournalArrosageService {
 
         journalRepo.delete(journal);
         log.info("Journal d'arrosage supprimé, id={}", id);
-        return ResponseEntity.ok("Journal supprimé avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Journal supprimé avec succès");
+        response.put("id", id);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Ajouter une prévision météo</h2>
+<h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Ajouter' }} une prévision météo</h2>
 
 <mat-dialog-content>
   <form [formGroup]="previsionForm">
@@ -42,6 +42,6 @@
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Annuler</button>
   <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!previsionForm.valid">
-    Créer
+    {{ isEditMode ? 'Modifier' : 'Créer' }}
   </button>
 </mat-dialog-actions>

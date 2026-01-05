@@ -1,4 +1,24 @@
 services:
+  # 1. MySQL démarre EN PREMIER
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: irrigation
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - irrigation-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Eureka Server démarre APRÈS MySQL
   eureka-server:
     build:
       context: ./backend/eureka-server
@@ -9,12 +29,32 @@ services:
       - SPRING_APPLICATION_NAME=eureka-server
     networks:
       - irrigation-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+
+  # 3. Config Server démarre APRÈS Eureka
+  config-server:
+    build:
+      context: ./backend/config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_APPLICATION_NAME=config-server
+    networks:
+      - irrigation-network
+    depends_on:
+      - eureka-server
+    restart: on-failure
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
+  # 4. Meteo Service démarre APRÈS Config Server
   meteo-service:
     build:
       context: ./backend/meteo-service
@@ -22,20 +62,19 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SERVER_PORT=8081
-      - SPRING_APPLICATION_NAME=METEO-SERVICE
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/meteoservice
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      eureka-server:
+      mysql:
+        condition: service_healthy
+      config-server:
         condition: service_healthy
     networks:
       - irrigation-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: on-failure
 
+  # 5. Arrosage Service démarre APRÈS Config Server
   arrosage-service:
     build:
       context: ./backend/arrosage-service
@@ -43,55 +82,47 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SERVER_PORT=8082
-      - SPRING_APPLICATION_NAME=ARROSAGE-SERVICE
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/arrosageservice
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
     depends_on:
-      eureka-server:
+      mysql:
+        condition: service_healthy
+      config-server:
         condition: service_healthy
     networks:
       - irrigation-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: on-failure
 
+  # 6. Gateway démarre APRÈS tous les services
   gateway:
     build:
       context: ./backend/Gateway
       dockerfile: Dockerfile
     ports:
       - "9094:9094"
-    environment:
-      - SERVER_PORT=9094
-      - SPRING_APPLICATION_NAME=Gateway
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
     depends_on:
-      meteo-service:
-        condition: service_healthy
-      arrosage-service:
-        condition: service_healthy
+      - config-server
+      - meteo-service
+      - arrosage-service
     networks:
       - irrigation-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9094/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: on-failure
 
+  # 7. Frontend démarre EN DERNIER
   frontend:
     build:
       context: ./frontend/irrigation-frontend
-      dockerfile: ./Dockerfile.frontend
+      dockerfile: Dockerfile.frontend
     ports:
       - "4200:80"
-    environment:
-      - API_GATEWAY_URL=http://gateway:9094
     depends_on:
       - gateway
     networks:
       - irrigation-network
+
+volumes:
+  mysql-data:
 
 networks:
   irrigation-network:

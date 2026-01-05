@@ -1,7 +1,9 @@
 package tn.itbs.project.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ public class PrevisionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station introuvable"));
 
         prevision.setStation(station);
-        previsionRepo.save(prevision);
+        Prevision saved = previsionRepo.save(prevision);
 
         ChangementConditionsEvent event = ChangementConditionsEvent.builder()
                 .stationId(station.getId())
@@ -54,9 +56,11 @@ public class PrevisionService {
                 event
         );
 
-        return ResponseEntity.ok("Prévision ajoutée avec succès");
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Prévision ajoutée avec succès");
+        response.put("prevision", saved);
+        return ResponseEntity.ok(response);
     }
-
 
     public ResponseEntity<Object> consulter(Long id) {
         Prevision prevision = previsionRepo.findById(id)
@@ -70,12 +74,36 @@ public class PrevisionService {
     }
 
     @Transactional
+    public ResponseEntity<Object> modifier(Long id, Prevision newPrevision) {
+        Prevision prevision = previsionRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prévision introuvable"));
+
+        prevision.setDate(newPrevision.getDate());
+        prevision.setTemperatureMin(newPrevision.getTemperatureMin());
+        prevision.setTemperatureMax(newPrevision.getTemperatureMax());
+        prevision.setPluiePrevue(newPrevision.getPluiePrevue());
+        prevision.setVent(newPrevision.getVent());
+
+        Prevision updated = previsionRepo.save(prevision);
+        log.info("Prévision modifiée, id={}", id);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Prévision modifiée avec succès");
+        response.put("prevision", updated);
+        return ResponseEntity.ok(response);
+    }
+
+    @Transactional
     public ResponseEntity<Object> supprimer(Long id) {
         Prevision prevision = previsionRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prévision introuvable"));
 
         previsionRepo.delete(prevision);
         log.info("Prévision supprimée, id={}", id);
-        return ResponseEntity.ok("Prévision supprimée avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Prévision supprimée avec succès");
+        response.put("id", id);
+        return ResponseEntity.ok(response);
     }
 }

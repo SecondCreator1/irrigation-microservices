@@ -1,6 +1,8 @@
 package tn.itbs.project.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,9 +29,13 @@ public class ProgrammeArrosageService {
 
     @Transactional
     public ResponseEntity<Object> ajouter(ProgrammeArrosage programme) {
-        programmeRepo.save(programme);
+        ProgrammeArrosage saved = programmeRepo.save(programme);
         log.info("Programme d'arrosage ajouté pour parcelle {}", programme.getParcelleId());
-        return ResponseEntity.ok("Programme ajouté avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Programme ajouté avec succès");
+        response.put("programme", saved);
+        return ResponseEntity.ok(response);
     }
 
     // Exemple: ajout avec météo (appel Feign)
@@ -51,11 +57,14 @@ public class ProgrammeArrosageService {
             }
         }
 
-        programmeRepo.save(programme);
+        ProgrammeArrosage saved = programmeRepo.save(programme);
         log.info("Programme d'arrosage ajouté (météo prise en compte) pour parcelle {}", programme.getParcelleId());
-        return ResponseEntity.ok("Programme ajouté avec succès (météo prise en compte)");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Programme ajouté avec succès (météo prise en compte)");
+        response.put("programme", saved);
+        return ResponseEntity.ok(response);
     }
-
 
     public ResponseEntity<Object> consulter(Long id) {
         ProgrammeArrosage programme = programmeRepo.findById(id)
@@ -79,9 +88,13 @@ public class ProgrammeArrosageService {
         programme.setVolumePrevu(newProgramme.getVolumePrevu());
         programme.setStatut(newProgramme.getStatut());
 
-        programmeRepo.save(programme);
+        ProgrammeArrosage updated = programmeRepo.save(programme);
         log.info("Programme d'arrosage modifié, id={}", id);
-        return ResponseEntity.ok("Programme modifié avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Programme modifié avec succès");
+        response.put("programme", updated);
+        return ResponseEntity.ok(response);
     }
 
     @Transactional
@@ -91,6 +104,10 @@ public class ProgrammeArrosageService {
 
         programmeRepo.delete(programme);
         log.info("Programme d'arrosage supprimé, id={}", id);
-        return ResponseEntity.ok("Programme supprimé avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Programme supprimé avec succès");
+        response.put("id", id);
+        return ResponseEntity.ok(response);
     }
 }

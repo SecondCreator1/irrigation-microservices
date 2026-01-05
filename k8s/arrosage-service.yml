@@ -40,6 +40,18 @@ spec:
           value: ARROSAGE-SERVICE
         - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           value: http://eureka-server:8761/eureka
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:mysql://localhost:3306/arrosageservice?useSSL=false
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: ""
+        - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+          value: org.hibernate.dialect.MySQL8Dialect
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: update
+        - name: SPRING_RABBITMQ_ADDRESSES
+          value: amqps://umrodsgo:AUSX5RjQ9yFafZ_UN59Tl-2HO9P_CoTI@campbell.lmq.cloudamqp.com/umrodsgo
         resources:
           requests:
             memory: "512Mi"

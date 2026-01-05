@@ -24,6 +24,11 @@ public class JournalArrosageController {
         return journalService.consulter(id);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Object> listeTous() {
+        return journalService.listeTous();
+    }
+
     @GetMapping("/programme/{programmeId}")
     public ResponseEntity<Object> listeParProgramme(@PathVariable Long programmeId) {
         return journalService.listeParProgramme(programmeId);

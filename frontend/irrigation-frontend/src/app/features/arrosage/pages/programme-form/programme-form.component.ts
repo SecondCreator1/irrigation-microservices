@@ -14,6 +14,7 @@ import { ArrosageService } from '../../../../core/services/arrosage.service';
 import { MeteoService } from '../../../../core/services/meteo.service';
 import { ProgrammeArrosage, StatutProgramme } from '../../../../core/models/programme-arrosage.model';
 import { StationMeteo } from '../../../../core/models/station-meteo.model';
+
 @Component({
   selector: 'app-programme-form',
   templateUrl: './programme-form.component.html',
@@ -39,6 +40,7 @@ export class ProgrammeFormComponent implements OnInit {
   statuts = Object.values(StatutProgramme);
   stations: StationMeteo[] = [];
   useMeteo = false;
+
   constructor(
     private fb: FormBuilder,
     private arrosageService: ArrosageService,
@@ -47,22 +49,22 @@ export class ProgrammeFormComponent implements OnInit {
     public dialogRef: MatDialogRef<ProgrammeFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ProgrammeArrosage
   ) {
+    this.isEditMode = !!data;
+
     this.programmeForm = this.fb.group({
-      parcelleId: ['', [Validators.required, Validators.min(1)]],
-      datePlanifiee: [new Date().toISOString().split('T')[0], Validators.required],
-      duree: ['', [Validators.min(1), Validators.max(480)]],
-      volumePrevu: ['', [Validators.min(0), Validators.max(10000)]],
-      statut: [StatutProgramme.PREVU, Validators.required],
+      parcelleId: [data?.parcelleId || '', [Validators.required, Validators.min(1)]],
+      datePlanifiee: [data?.datePlanifiee || new Date().toISOString().split('T')[0], Validators.required],
+      duree: [data?.duree || '', [Validators.min(1), Validators.max(480)]],
+      volumePrevu: [data?.volumePrevu || '', [Validators.min(0), Validators.max(10000)]],
+      statut: [data?.statut || StatutProgramme.PREVU, Validators.required],
       stationId: ['']
     });
   }
+
   ngOnInit(): void {
     this.loadStations();
-    if (this.data) {
-      this.isEditMode = true;
-      this.programmeForm.patchValue(this.data);
-    }
   }
+
   loadStations(): void {
     this.meteoService.getAllStations().subscribe({
       next: (data) => {
@@ -73,6 +75,7 @@ export class ProgrammeFormComponent implements OnInit {
       }
     });
   }
+
   onSubmit(): void {
     if (this.programmeForm.valid) {
       const programme: ProgrammeArrosage = {
@@ -82,11 +85,12 @@ export class ProgrammeFormComponent implements OnInit {
         volumePrevu: this.programmeForm.value.volumePrevu,
         statut: this.programmeForm.value.statut
       };
+
       if (this.isEditMode && this.data.id) {
         this.arrosageService.updateProgramme(this.data.id, programme).subscribe({
-          next: (result) => {
+          next: () => {
             this.snackBar.open('Programme modifié avec succès', 'Fermer', { duration: 3000 });
-            this.dialogRef.close(result);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Erreur lors de la modification', error);
@@ -96,9 +100,9 @@ export class ProgrammeFormComponent implements OnInit {
       } else {
         if (this.useMeteo && this.programmeForm.value.stationId) {
           this.arrosageService.createProgrammeWithMeteo(this.programmeForm.value.stationId, programme).subscribe({
-            next: (result) => {
+            next: () => {
               this.snackBar.open('Programme créé avec ajustement météo', 'Fermer', { duration: 3000 });
-              this.dialogRef.close(result);
+              this.dialogRef.close(true);
             },
             error: (error) => {
               console.error('Erreur lors de la création', error);
@@ -107,9 +111,9 @@ export class ProgrammeFormComponent implements OnInit {
           });
         } else {
           this.arrosageService.createProgramme(programme).subscribe({
-            next: (result) => {
+            next: () => {
               this.snackBar.open('Programme créé avec succès', 'Fermer', { duration: 3000 });
-              this.dialogRef.close(result);
+              this.dialogRef.close(true);
             },
             error: (error) => {
               console.error('Erreur lors de la création', error);
@@ -120,6 +124,7 @@ export class ProgrammeFormComponent implements OnInit {
       }
     }
   }
+
   onCancel(): void {
     this.dialogRef.close(false);
   }

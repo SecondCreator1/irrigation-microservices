@@ -40,6 +40,8 @@ spec:
           value: Gateway
         - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
           value: http://eureka-server:8761/eureka
+        - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
+          value: "true"
         resources:
           requests:
             memory: "512Mi"

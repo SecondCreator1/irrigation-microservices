@@ -33,6 +33,11 @@ public class PrevisionController {
         return previsionService.listeParStationEtDate(stationId, d);
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Object> modifier(@PathVariable Long id, @RequestBody Prevision prevision) {
+        return previsionService.modifier(id, prevision);
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> supprimer(@PathVariable Long id) {
         return previsionService.supprimer(id);

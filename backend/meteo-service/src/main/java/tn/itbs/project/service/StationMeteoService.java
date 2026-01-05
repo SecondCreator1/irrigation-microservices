@@ -1,5 +1,8 @@
 package tn.itbs.project.service;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import lombok.extern.slf4j.Slf4j;
 import tn.itbs.project.entity.StationMeteo;
 import tn.itbs.project.repository.StationMeteoRepository;
+
 @Slf4j
 @Service
 public class StationMeteoService {
@@ -20,9 +24,13 @@ public class StationMeteoService {
 
     @Transactional
     public ResponseEntity<Object> ajouter(StationMeteo station) {
-        stationRepo.save(station);
+        StationMeteo saved = stationRepo.save(station);
         log.info("Station ajoutée : {}", station.getNom());
-        return ResponseEntity.ok("Station ajoutée avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Station ajoutée avec succès");
+        response.put("station", saved);
+        return ResponseEntity.ok(response);
     }
 
     public ResponseEntity<Object> consulter(Long id) {
@@ -46,9 +54,13 @@ public class StationMeteoService {
         station.setLongitude(newStation.getLongitude());
         station.setFournisseur(newStation.getFournisseur());
 
-        stationRepo.save(station);
+        StationMeteo updated = stationRepo.save(station);
         log.info("Station modifiée : {}", station.getNom());
-        return ResponseEntity.ok("Station modifiée avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Station modifiée avec succès");
+        response.put("station", updated);
+        return ResponseEntity.ok(response);
     }
 
     @Transactional
@@ -57,6 +69,10 @@ public class StationMeteoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Station introuvable"));
         stationRepo.delete(station);
         log.info("Station supprimée : {}", station.getNom());
-        return ResponseEntity.ok("Station supprimée avec succès");
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Station supprimée avec succès");
+        response.put("id", id);
+        return ResponseEntity.ok(response);
     }
 }

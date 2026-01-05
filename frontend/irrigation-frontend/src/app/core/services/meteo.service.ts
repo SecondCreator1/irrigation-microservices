@@ -23,8 +23,10 @@ export class MeteoService {
     return this.http.get<StationMeteo>(`${this.stationApiUrl}/${id}`);
   }
 
-  createStation(station: StationMeteo): Observable<StationMeteo> {
-    return this.http.post<StationMeteo>(`${this.stationApiUrl}/add`, station);
+  createStation(station: StationMeteo): Observable<any> {
+    return this.http.post(`${this.stationApiUrl}/add`, station, {
+      responseType: 'text' as 'json'
+    });
   }
 
   updateStation(id: number, station: StationMeteo): Observable<StationMeteo> {
@@ -46,6 +48,10 @@ export class MeteoService {
 
   createPrevision(stationId: number, prevision: Prevision): Observable<Prevision> {
     return this.http.post<Prevision>(`${this.previsionApiUrl}/add/${stationId}`, prevision);
+  }
+
+  updatePrevision(id: number, prevision: Prevision): Observable<any> {
+    return this.http.put(`${this.previsionApiUrl}/update/${id}`, prevision);
   }
 
   deletePrevision(id: number): Observable<void> {

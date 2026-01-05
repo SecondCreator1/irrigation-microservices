@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MeteoService } from '../../../../core/services/meteo.service';
 import { Prevision } from '../../../../core/models/prevision.model';
+
 @Component({
   selector: 'app-prevision-form',
   templateUrl: './prevision-form.component.html',
@@ -29,37 +30,58 @@ import { Prevision } from '../../../../core/models/prevision.model';
 })
 export class PrevisionFormComponent implements OnInit {
   previsionForm: FormGroup;
+  isEditMode: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private meteoService: MeteoService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<PrevisionFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { stationId: number }
+    @Inject(MAT_DIALOG_DATA) public data: { stationId: number; prevision?: Prevision }
   ) {
+    this.isEditMode = !!data.prevision;
+    
     this.previsionForm = this.fb.group({
-      date: [new Date().toISOString().split('T')[0], Validators.required],
-      temperatureMax: ['', [Validators.min(-50), Validators.max(60)]],
-      temperatureMin: ['', [Validators.min(-50), Validators.max(60)]],
-      pluiePrevue: ['', [Validators.min(0), Validators.max(500)]],
-      vent: ['', [Validators.min(0), Validators.max(300)]]
+      date: [data.prevision?.date || new Date().toISOString().split('T')[0], Validators.required],
+      temperatureMax: [data.prevision?.temperatureMax || '', [Validators.min(-50), Validators.max(60)]],
+      temperatureMin: [data.prevision?.temperatureMin || '', [Validators.min(-50), Validators.max(60)]],
+      pluiePrevue: [data.prevision?.pluiePrevue || '', [Validators.min(0), Validators.max(500)]],
+      vent: [data.prevision?.vent || '', [Validators.min(0), Validators.max(300)]]
     });
   }
+
   ngOnInit(): void { }
+
   onSubmit(): void {
     if (this.previsionForm.valid) {
       const prevision: Prevision = this.previsionForm.value;
-      this.meteoService.createPrevision(this.data.stationId, prevision).subscribe({
-        next: () => {
-          this.snackBar.open('Prévision créée avec succès', 'Fermer', { duration: 3000 });
-          this.dialogRef.close(true);
-        },
-        error: (error) => {
-          console.error('Erreur lors de la création', error);
-          this.snackBar.open('Erreur lors de la création', 'Fermer', { duration: 3000 });
-        }
-      });
+      
+      if (this.isEditMode && this.data.prevision?.id) {
+        this.meteoService.updatePrevision(this.data.prevision.id, prevision).subscribe({
+          next: () => {
+            this.snackBar.open('Prévision modifiée avec succès', 'Fermer', { duration: 3000 });
+            this.dialogRef.close(true);
+          },
+          error: (error) => {
+            console.error('Erreur lors de la modification', error);
+            this.snackBar.open('Erreur lors de la modification', 'Fermer', { duration: 3000 });
+          }
+        });
+      } else {
+        this.meteoService.createPrevision(this.data.stationId, prevision).subscribe({
+          next: () => {
+            this.snackBar.open('Prévision créée avec succès', 'Fermer', { duration: 3000 });
+            this.dialogRef.close(true);
+          },
+          error: (error) => {
+            console.error('Erreur lors de la création', error);
+            this.snackBar.open('Erreur lors de la création', 'Fermer', { duration: 3000 });
+          }
+        });
+      }
     }
   }
+
   onCancel(): void {
     this.dialogRef.close(false);
   }

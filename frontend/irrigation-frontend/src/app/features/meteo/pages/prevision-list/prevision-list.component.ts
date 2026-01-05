@@ -11,10 +11,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MeteoService } from '../../../../core/services/meteo.service';
 import { Prevision } from '../../../../core/models/prevision.model';
 import { StationMeteo } from '../../../../core/models/station-meteo.model';
 import { PrevisionFormComponent } from '../prevision-form/prevision-form.component';
+
 @Component({
   selector: 'app-prevision-list',
   templateUrl: './prevision-list.component.html',
@@ -32,7 +34,8 @@ import { PrevisionFormComponent } from '../prevision-form/prevision-form.compone
     MatSelectModule,
     MatTableModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ]
 })
 export class PrevisionListComponent implements OnInit {
@@ -42,14 +45,17 @@ export class PrevisionListComponent implements OnInit {
   selectedDate: string = new Date().toISOString().split('T')[0];
   displayedColumns: string[] = ['date', 'temperatureMax', 'temperatureMin', 'pluiePrevue', 'vent', 'actions'];
   isLoading = false;
+
   constructor(
     private meteoService: MeteoService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) { }
+
   ngOnInit(): void {
     this.loadStations();
   }
+
   loadStations(): void {
     this.meteoService.getAllStations().subscribe({
       next: (data) => {
@@ -65,6 +71,7 @@ export class PrevisionListComponent implements OnInit {
       }
     });
   }
+
   loadPrevisions(): void {
     if (!this.selectedStationId) return;
     this.isLoading = true;
@@ -80,23 +87,44 @@ export class PrevisionListComponent implements OnInit {
       }
     });
   }
+
   onStationChange(): void {
     this.loadPrevisions();
   }
+
   onDateChange(): void {
     this.loadPrevisions();
   }
+
   openAddDialog(): void {
     const dialogRef = this.dialog.open(PrevisionFormComponent, {
       width: '600px',
       data: { stationId: this.selectedStationId }
     });
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadPrevisions();
       }
     });
   }
+
+  openEditDialog(prevision: Prevision): void {
+    const dialogRef = this.dialog.open(PrevisionFormComponent, {
+      width: '600px',
+      data: { 
+        stationId: this.selectedStationId,
+        prevision: prevision
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadPrevisions();
+      }
+    });
+  }
+
   deletePrevision(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette prévision ?')) {
       this.meteoService.deletePrevision(id).subscribe({
