@@ -5,7 +5,7 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Nom de la station</mat-label>
       <input matInput formControlName="nom" placeholder="Ex: Station Tunis">
-      <mat-error *ngIf="stationForm.get('nom')?.hasError('required')">
+      <mat-error *ngIf="stationForm.get('nom')?.hasError('required') && stationForm.get('nom')?.touched">
         Le nom est requis
       </mat-error>
     </mat-form-field>
@@ -13,10 +13,10 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Latitude</mat-label>
       <input matInput type="number" formControlName="latitude" placeholder="Ex: 36.8065">
-      <mat-error *ngIf="stationForm.get('latitude')?.hasError('required')">
+      <mat-error *ngIf="stationForm.get('latitude')?.hasError('required') && stationForm.get('latitude')?.touched">
         La latitude est requise
       </mat-error>
-      <mat-error *ngIf="stationForm.get('latitude')?.hasError('min') || stationForm.get('latitude')?.hasError('max')">
+      <mat-error *ngIf="(stationForm.get('latitude')?.hasError('min') || stationForm.get('latitude')?.hasError('max')) && stationForm.get('latitude')?.touched">
         La latitude doit être entre -90 et 90
       </mat-error>
     </mat-form-field>
@@ -24,10 +24,10 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Longitude</mat-label>
       <input matInput type="number" formControlName="longitude" placeholder="Ex: 10.1815">
-      <mat-error *ngIf="stationForm.get('longitude')?.hasError('required')">
+      <mat-error *ngIf="stationForm.get('longitude')?.hasError('required') && stationForm.get('longitude')?.touched">
         La longitude est requise
       </mat-error>
-      <mat-error *ngIf="stationForm.get('longitude')?.hasError('min') || stationForm.get('longitude')?.hasError('max')">
+      <mat-error *ngIf="(stationForm.get('longitude')?.hasError('min') || stationForm.get('longitude')?.hasError('max')) && stationForm.get('longitude')?.touched">
         La longitude doit être entre -180 et 180
       </mat-error>
     </mat-form-field>
@@ -35,13 +35,16 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Fournisseur</mat-label>
       <input matInput formControlName="fournisseur" placeholder="Ex: OpenWeather">
+      <mat-error *ngIf="stationForm.get('fournisseur')?.hasError('required') && stationForm.get('fournisseur')?.touched">
+        Le fournisseur est requis
+      </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!stationForm.valid">
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="stationForm.invalid">
     {{ isEditMode ? 'Modifier' : 'Créer' }}
   </button>
 </mat-dialog-actions>

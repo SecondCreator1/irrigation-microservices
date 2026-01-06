@@ -5,7 +5,7 @@
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Date</mat-label>
       <input matInput type="date" formControlName="date">
-      <mat-error *ngIf="previsionForm.get('date')?.hasError('required')">
+      <mat-error *ngIf="previsionForm.get('date')?.hasError('required') && previsionForm.get('date')?.touched">
         La date est requise
       </mat-error>
     </mat-form-field>
@@ -15,12 +15,24 @@
         <mat-label>Température Max (°C)</mat-label>
         <input matInput type="number" formControlName="temperatureMax" placeholder="Ex: 28">
         <mat-icon matSuffix>thermostat</mat-icon>
+        <mat-error *ngIf="previsionForm.get('temperatureMax')?.hasError('required') && previsionForm.get('temperatureMax')?.touched">
+          La température max est requise
+        </mat-error>
+        <mat-error *ngIf="(previsionForm.get('temperatureMax')?.hasError('min') || previsionForm.get('temperatureMax')?.hasError('max')) && previsionForm.get('temperatureMax')?.touched">
+          La température max doit être entre -50 et 60
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Température Min (°C)</mat-label>
         <input matInput type="number" formControlName="temperatureMin" placeholder="Ex: 15">
         <mat-icon matSuffix>ac_unit</mat-icon>
+        <mat-error *ngIf="previsionForm.get('temperatureMin')?.hasError('required') && previsionForm.get('temperatureMin')?.touched">
+          La température min est requise
+        </mat-error>
+        <mat-error *ngIf="(previsionForm.get('temperatureMin')?.hasError('min') || previsionForm.get('temperatureMin')?.hasError('max')) && previsionForm.get('temperatureMin')?.touched">
+          La température min doit être entre -50 et 60
+        </mat-error>
       </mat-form-field>
     </div>
 
@@ -29,19 +41,31 @@
       <input matInput type="number" formControlName="pluiePrevue" placeholder="Ex: 5">
       <mat-icon matSuffix>water_drop</mat-icon>
       <mat-hint>Quantité de pluie en millimètres</mat-hint>
+      <mat-error *ngIf="previsionForm.get('pluiePrevue')?.hasError('required') && previsionForm.get('pluiePrevue')?.touched">
+        La pluie prévue est requise
+      </mat-error>
+      <mat-error *ngIf="(previsionForm.get('pluiePrevue')?.hasError('min') || previsionForm.get('pluiePrevue')?.hasError('max')) && previsionForm.get('pluiePrevue')?.touched">
+        La pluie prévue doit être entre 0 et 500 mm
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Vent (km/h)</mat-label>
       <input matInput type="number" formControlName="vent" placeholder="Ex: 20">
       <mat-icon matSuffix>air</mat-icon>
+      <mat-error *ngIf="previsionForm.get('vent')?.hasError('required') && previsionForm.get('vent')?.touched">
+        La vitesse du vent est requise
+      </mat-error>
+      <mat-error *ngIf="(previsionForm.get('vent')?.hasError('min') || previsionForm.get('vent')?.hasError('max')) && previsionForm.get('vent')?.touched">
+        Le vent doit être entre 0 et 300 km/h
+      </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!previsionForm.valid">
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="previsionForm.invalid">
     {{ isEditMode ? 'Modifier' : 'Créer' }}
   </button>
 </mat-dialog-actions>

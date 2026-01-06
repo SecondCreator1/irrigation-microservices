@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -37,7 +36,9 @@ import { StationMeteo } from '../../../../core/models/station-meteo.model';
 export class ProgrammeFormComponent implements OnInit {
   programmeForm: FormGroup;
   isEditMode = false;
-  statuts = Object.values(StatutProgramme);
+  statuts = Object.values(StatutProgramme).filter(
+    s => s !== StatutProgramme.TERMINE
+  );
   stations: StationMeteo[] = [];
   useMeteo = false;
 
@@ -54,10 +55,10 @@ export class ProgrammeFormComponent implements OnInit {
     this.programmeForm = this.fb.group({
       parcelleId: [data?.parcelleId || '', [Validators.required, Validators.min(1)]],
       datePlanifiee: [data?.datePlanifiee || new Date().toISOString().split('T')[0], Validators.required],
-      duree: [data?.duree || '', [Validators.min(1), Validators.max(480)]],
-      volumePrevu: [data?.volumePrevu || '', [Validators.min(0), Validators.max(10000)]],
+      duree: [data?.duree ?? '', [Validators.required, Validators.min(1), Validators.max(480)]],
+      volumePrevu: [data?.volumePrevu ?? '', [Validators.required, Validators.min(1), Validators.max(10000)]],
       statut: [data?.statut || StatutProgramme.PREVU, Validators.required],
-      stationId: ['']
+      stationId: [''] // obligatoire seulement si useMeteo = true
     });
   }
 
@@ -77,50 +78,62 @@ export class ProgrammeFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.programmeForm.valid) {
-      const programme: ProgrammeArrosage = {
-        parcelleId: this.programmeForm.value.parcelleId,
-        datePlanifiee: this.programmeForm.value.datePlanifiee,
-        duree: this.programmeForm.value.duree,
-        volumePrevu: this.programmeForm.value.volumePrevu,
-        statut: this.programmeForm.value.statut
-      };
+    // Si useMeteo = true on impose stationId obligatoire
+    if (this.useMeteo) {
+      this.programmeForm.get('stationId')?.setValidators([Validators.required]);
+      this.programmeForm.get('stationId')?.updateValueAndValidity();
+    } else {
+      this.programmeForm.get('stationId')?.clearValidators();
+      this.programmeForm.get('stationId')?.updateValueAndValidity();
+    }
 
-      if (this.isEditMode && this.data.id) {
-        this.arrosageService.updateProgramme(this.data.id, programme).subscribe({
+    if (this.programmeForm.invalid) {
+      this.programmeForm.markAllAsTouched();
+      return;
+    }
+
+    const programme: ProgrammeArrosage = {
+      parcelleId: this.programmeForm.value.parcelleId,
+      datePlanifiee: this.programmeForm.value.datePlanifiee,
+      duree: this.programmeForm.value.duree,
+      volumePrevu: this.programmeForm.value.volumePrevu,
+      statut: this.programmeForm.value.statut
+    };
+
+    if (this.isEditMode && this.data.id) {
+      this.arrosageService.updateProgramme(this.data.id, programme).subscribe({
+        next: () => {
+          this.snackBar.open('Programme modifié avec succès', 'Fermer', { duration: 3000 });
+          this.dialogRef.close(true);
+        },
+        error: (error) => {
+          console.error('Erreur lors de la modification', error);
+          this.snackBar.open('Erreur lors de la modification', 'Fermer', { duration: 3000 });
+        }
+      });
+    } else {
+      if (this.useMeteo && this.programmeForm.value.stationId) {
+        this.arrosageService.createProgrammeWithMeteo(this.programmeForm.value.stationId, programme).subscribe({
           next: () => {
-            this.snackBar.open('Programme modifié avec succès', 'Fermer', { duration: 3000 });
+            this.snackBar.open('Programme créé avec ajustement météo', 'Fermer', { duration: 3000 });
             this.dialogRef.close(true);
           },
           error: (error) => {
-            console.error('Erreur lors de la modification', error);
-            this.snackBar.open('Erreur lors de la modification', 'Fermer', { duration: 3000 });
+            console.error('Erreur lors de la création', error);
+            this.snackBar.open('Erreur lors de la création', 'Fermer', { duration: 3000 });
           }
         });
       } else {
-        if (this.useMeteo && this.programmeForm.value.stationId) {
-          this.arrosageService.createProgrammeWithMeteo(this.programmeForm.value.stationId, programme).subscribe({
-            next: () => {
-              this.snackBar.open('Programme créé avec ajustement météo', 'Fermer', { duration: 3000 });
-              this.dialogRef.close(true);
-            },
-            error: (error) => {
-              console.error('Erreur lors de la création', error);
-              this.snackBar.open('Erreur lors de la création', 'Fermer', { duration: 3000 });
-            }
-          });
-        } else {
-          this.arrosageService.createProgramme(programme).subscribe({
-            next: () => {
-              this.snackBar.open('Programme créé avec succès', 'Fermer', { duration: 3000 });
-              this.dialogRef.close(true);
-            },
-            error: (error) => {
-              console.error('Erreur lors de la création', error);
-              this.snackBar.open('Erreur lors de la création', 'Fermer', { duration: 3000 });
-            }
-          });
-        }
+        this.arrosageService.createProgramme(programme).subscribe({
+          next: () => {
+            this.snackBar.open('Programme créé avec succès', 'Fermer', { duration: 3000 });
+            this.dialogRef.close(true);
+          },
+          error: (error) => {
+            console.error('Erreur lors de la création', error);
+            this.snackBar.open('Erreur lors de la création', 'Fermer', { duration: 3000 });
+          }
+        });
       }
     }
   }

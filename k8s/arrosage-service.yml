@@ -10,7 +10,6 @@ spec:
     - port: 8082
       targetPort: 8082
   type: ClusterIP
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,46 +27,42 @@ spec:
         app: arrosage-service
     spec:
       containers:
-      - name: arrosage-service
-        image: irrigation/arrosage-service:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8082
-        env:
-        - name: SERVER_PORT
-          value: "8082"
-        - name: SPRING_APPLICATION_NAME
-          value: ARROSAGE-SERVICE
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          value: http://eureka-server:8761/eureka
-        - name: SPRING_DATASOURCE_URL
-          value: jdbc:mysql://localhost:3306/arrosageservice?useSSL=false
-        - name: SPRING_DATASOURCE_USERNAME
-          value: "root"
-        - name: SPRING_DATASOURCE_PASSWORD
-          value: ""
-        - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
-          value: org.hibernate.dialect.MySQL8Dialect
-        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-          value: update
-        - name: SPRING_RABBITMQ_ADDRESSES
-          value: amqps://umrodsgo:AUSX5RjQ9yFafZ_UN59Tl-2HO9P_CoTI@campbell.lmq.cloudamqp.com/umrodsgo
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8082
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8082
-          initialDelaySeconds: 20
-          periodSeconds: 5
+        - name: arrosage-service
+          image: irrigation-microservices-arrosage-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: arrosage-service
+            - name: SERVER_PORT
+              value: "8082"
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/arrosageservice?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "root"
+            - name: SPRING_RABBITMQ_ADDRESSES
+              value: "amqps://umrodsgo:AUSX5RjQ9yFafZ_UN59Tl-2HO9P_CoTI@campbell.lmq.cloudamqp.com/umrodsgo"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-server:8761/eureka/"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 5

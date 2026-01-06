@@ -9,8 +9,7 @@ spec:
   ports:
     - port: 9094
       targetPort: 9094
-  type: LoadBalancer
-
+  type: LoadBalancer    # pour exposer l'API vers l'extérieur
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,36 +27,36 @@ spec:
         app: gateway
     spec:
       containers:
-      - name: gateway
-        image: irrigation/gateway:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9094
-        env:
-        - name: SERVER_PORT
-          value: "9094"
-        - name: SPRING_APPLICATION_NAME
-          value: Gateway
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          value: http://eureka-server:8761/eureka
-        - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
-          value: "true"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 9094
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 9094
-          initialDelaySeconds: 20
-          periodSeconds: 5
+        - name: gateway
+          image: irrigation-microservices-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9094
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: gateway
+            - name: SERVER_PORT
+              value: "9094"
+            - name: SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED
+              value: "true"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-server:8761/eureka/"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9094
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9094
+            initialDelaySeconds: 20
+            periodSeconds: 5

@@ -6,15 +6,18 @@
       <mat-label>Numéro de Parcelle</mat-label>
       <input matInput type="number" formControlName="parcelleId" placeholder="Ex: 1">
       <mat-icon matSuffix>landscape</mat-icon>
-      <mat-error *ngIf="programmeForm.get('parcelleId')?.hasError('required')">
+      <mat-error *ngIf="programmeForm.get('parcelleId')?.hasError('required') && programmeForm.get('parcelleId')?.touched">
         Le numéro de parcelle est requis
+      </mat-error>
+      <mat-error *ngIf="programmeForm.get('parcelleId')?.hasError('min') && programmeForm.get('parcelleId')?.touched">
+        Le numéro de parcelle doit être supérieur ou égal à 1
       </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Date Planifiée</mat-label>
       <input matInput type="date" formControlName="datePlanifiee">
-      <mat-error *ngIf="programmeForm.get('datePlanifiee')?.hasError('required')">
+      <mat-error *ngIf="programmeForm.get('datePlanifiee')?.hasError('required') && programmeForm.get('datePlanifiee')?.touched">
         La date est requise
       </mat-error>
     </mat-form-field>
@@ -24,12 +27,24 @@
         <mat-label>Durée (minutes)</mat-label>
         <input matInput type="number" formControlName="duree" placeholder="Ex: 60">
         <mat-icon matSuffix>timer</mat-icon>
+        <mat-error *ngIf="programmeForm.get('duree')?.hasError('required') && programmeForm.get('duree')?.touched">
+          La durée est requise
+        </mat-error>
+        <mat-error *ngIf="(programmeForm.get('duree')?.hasError('min') || programmeForm.get('duree')?.hasError('max')) && programmeForm.get('duree')?.touched">
+          La durée doit être entre 1 et 480 minutes
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Volume Prévu (litres)</mat-label>
         <input matInput type="number" formControlName="volumePrevu" placeholder="Ex: 500">
         <mat-icon matSuffix>water</mat-icon>
+        <mat-error *ngIf="programmeForm.get('volumePrevu')?.hasError('required') && programmeForm.get('volumePrevu')?.touched">
+          Le volume prévu est requis
+        </mat-error>
+        <mat-error *ngIf="(programmeForm.get('volumePrevu')?.hasError('min') || programmeForm.get('volumePrevu')?.hasError('max')) && programmeForm.get('volumePrevu')?.touched">
+          Le volume doit être entre 1 et 10000 litres
+        </mat-error>
       </mat-form-field>
     </div>
 
@@ -37,9 +52,12 @@
       <mat-label>Statut</mat-label>
       <mat-select formControlName="statut">
         <mat-option *ngFor="let statut of statuts" [value]="statut">
-          {{statut}}
+          {{ statut }}
         </mat-option>
       </mat-select>
+      <mat-error *ngIf="programmeForm.get('statut')?.hasError('required') && programmeForm.get('statut')?.touched">
+        Le statut est requis
+      </mat-error>
     </mat-form-field>
 
     <div *ngIf="!isEditMode" class="meteo-section">
@@ -51,9 +69,12 @@
         <mat-label>Station Météo</mat-label>
         <mat-select formControlName="stationId">
           <mat-option *ngFor="let station of stations" [value]="station.id">
-            {{station.nom}}
+            {{ station.nom }}
           </mat-option>
         </mat-select>
+        <mat-error *ngIf="programmeForm.get('stationId')?.hasError('required') && programmeForm.get('stationId')?.touched">
+          La station météo est requise lorsque l'ajustement météo est activé
+        </mat-error>
       </mat-form-field>
     </div>
   </form>
@@ -61,7 +82,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!programmeForm.valid">
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="programmeForm.invalid">
     {{ isEditMode ? 'Modifier' : 'Créer' }}
   </button>
 </mat-dialog-actions>

@@ -4,10 +4,26 @@
       <h1>Tableau de Bord</h1>
       <p class="subtitle">Vue d'ensemble du système d'irrigation</p>
     </div>
-    <button mat-raised-button color="primary" (click)="refreshDashboard()">
-      <mat-icon>refresh</mat-icon>
-      Actualiser
-    </button>
+
+    <div class="filters">
+      <!-- Select Station -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Station Météo</mat-label>
+        <mat-select
+          [value]="selectedStationId"
+          (selectionChange)="onStationChange($event.value)"
+        >
+          <mat-option *ngFor="let station of stations" [value]="station.id">
+            {{ station.nom }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="refreshDashboard()">
+        <mat-icon>refresh</mat-icon>
+        Actualiser
+      </button>
+    </div>
   </div>
 
   <div *ngIf="isLoading" class="loading-container">
@@ -23,7 +39,7 @@
             <mat-icon class="kpi-icon">place</mat-icon>
             <span class="kpi-label">Stations Météo</span>
           </div>
-          <div class="kpi-value">{{totalStations}}</div>
+          <div class="kpi-value">{{ totalStations }}</div>
           <div class="kpi-footer">
             <span class="kpi-trend positive">
               <mat-icon>trending_up</mat-icon>
@@ -39,7 +55,7 @@
             <mat-icon class="kpi-icon">schedule</mat-icon>
             <span class="kpi-label">Total Programmes</span>
           </div>
-          <div class="kpi-value">{{totalProgrammes}}</div>
+          <div class="kpi-value">{{ totalProgrammes }}</div>
           <div class="kpi-footer">
             <span class="kpi-info">
               <mat-icon>schedule</mat-icon>
@@ -55,7 +71,7 @@
             <mat-icon class="kpi-icon">play_circle</mat-icon>
             <span class="kpi-label">Programmes Actifs</span>
           </div>
-          <div class="kpi-value">{{programmesActifs}}</div>
+          <div class="kpi-value">{{ programmesActifs }}</div>
           <div class="kpi-footer">
             <span class="kpi-trend positive">
               <mat-icon>check_circle</mat-icon>
@@ -71,7 +87,9 @@
             <mat-icon class="kpi-icon">water_drop</mat-icon>
             <span class="kpi-label">Volume Prévu</span>
           </div>
-          <div class="kpi-value">{{volumeTotalPrevu | number:'1.0-0'}}<span class="unit">L</span></div>
+          <div class="kpi-value">
+            {{ volumeTotalPrevu | number : '1.0-0' }}<span class="unit">L</span>
+          </div>
           <div class="kpi-footer">
             <span class="kpi-info">
               <mat-icon>water</mat-icon>
@@ -94,10 +112,12 @@
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
+            <canvas
+              baseChart
               [data]="temperatureChartData"
               [options]="temperatureChartOptions"
-              [type]="'line'">
+              [type]="'line'"
+            >
             </canvas>
           </div>
         </mat-card-content>
@@ -113,10 +133,12 @@
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
+            <canvas
+              baseChart
               [data]="rainChartData"
               [options]="rainChartOptions"
-              [type]="'bar'">
+              [type]="'bar'"
+            >
             </canvas>
           </div>
         </mat-card-content>
@@ -132,10 +154,12 @@
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
+            <canvas
+              baseChart
               [data]="statutChartData"
               [options]="statutChartOptions"
-              [type]="'doughnut'">
+              [type]="'doughnut'"
+            >
             </canvas>
           </div>
         </mat-card-content>

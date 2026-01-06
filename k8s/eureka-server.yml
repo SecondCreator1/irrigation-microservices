@@ -10,7 +10,6 @@ spec:
     - port: 8761
       targetPort: 8761
   type: ClusterIP
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,18 +27,22 @@ spec:
         app: eureka-server
     spec:
       containers:
-      - name: eureka-server
-        image: irrigation/eureka-server:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8761
-        env:
-        - name: SPRING_APPLICATION_NAME
-          value: eureka-server
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
-          limits:
-            memory: "1Gi"
-            cpu: "500m"
+        - name: eureka-server
+          image: irrigation-microservices-eureka-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8761
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: eureka-server
+            - name: SERVER_PORT
+              value: "8761"
+            # eureka.instance.hostname peut rester localhost dans properties,
+            # ou tu peux le surcharger ici si besoin.
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"

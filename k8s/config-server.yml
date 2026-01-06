@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-server
+  namespace: irrigation
+spec:
+  selector:
+    app: config-server
+  ports:
+    - port: 8888
+      targetPort: 8888
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  namespace: irrigation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+    spec:
+      containers:
+        - name: config-server
+          image: irrigation-microservices-config-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8888
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: config-server
+            - name: SERVER_PORT
+              value: "8888"
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+              value: "https://gitlab.com/springboot3545046/irrigation-config-repo"
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL
+              value: "main"
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_CLONE_ON_START
+              value: "true"
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME
+              value: ${GIT_USERNAME}
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD
+              value: ${GIT_PASSWORD}
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
